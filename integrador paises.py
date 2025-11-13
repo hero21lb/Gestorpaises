@@ -7,7 +7,9 @@ from tkinter import messagebox
 from tkinter import ttk
 import time
 
-CSV_FILE = "paises.csv"
+import os
+
+CSV_FILE = os.path.join(os.path.dirname(__file__), "paises.csv")
 
 #funciones de manejo de paises
 
@@ -73,14 +75,27 @@ def ventana_anadir_pais():
     ventana2.title("Añadir País")
     ventana2.geometry("720x480")
     tk.Label(ventana2, text="Añadir Nuevo País", font=("Minecraft", 24)).pack(pady=20)
-    entrada_nombre = tk.Entry(ventana2, font=("Minecraft", 16))
-    entrada_nombre.pack(pady=10)
-    entrada_poblacion = tk.Entry(ventana2, font=("Minecraft", 16))
-    entrada_poblacion.pack(pady=10)
-    entrada_superficie = tk.Entry(ventana2, font=("Minecraft", 16))
-    entrada_superficie.pack(pady=10)
-    entrada_continente = tk.Entry(ventana2, font=("Minecraft", 16))
-    entrada_continente.pack(pady=10)
+    frame_nombre = tk.Frame(ventana2)
+    frame_nombre.pack(pady=10)
+    tk.Label(frame_nombre, text="Nombre: ", font=("Minecraft", 16)).pack(side="left", padx=5)
+    frame_poblacion = tk.Frame(ventana2)
+    frame_poblacion.pack(pady=10)
+    tk.Label(frame_poblacion, text="Población: ", font=("Minecraft", 16)).pack(side="left", padx=5)
+    frame_superficie = tk.Frame(ventana2)
+    frame_superficie.pack(pady=10)
+    tk.Label(frame_superficie, text="Superficie (km²): ", font=("Minecraft", 16)).pack(side="left", padx=5)
+    frame_continente = tk.Frame(ventana2)
+    frame_continente.pack(pady=10)
+    tk.Label(frame_continente, text="Continente: ", font=("Minecraft", 16)).pack(side="left", padx=5)
+
+    entrada_nombre = tk.Entry(frame_nombre, font=("Minecraft", 16))
+    entrada_nombre.pack(side="left", padx=5)
+    entrada_poblacion = tk.Entry(frame_poblacion, font=("Minecraft", 16))
+    entrada_poblacion.pack(side="left", padx=5)
+    entrada_superficie = tk.Entry(frame_superficie, font=("Minecraft", 16))
+    entrada_superficie.pack(side="left", padx=5)
+    entrada_continente = tk.Entry(frame_continente, font=("Minecraft", 16))
+    entrada_continente.pack(side="left", padx=5)
     tk.Button(ventana2, text="Guardar País", font=("Minecraft", 16), width=20, height=2, command=lambda: anadir_pais_gui(entrada_nombre.get(), entrada_poblacion.get(), entrada_superficie.get(), entrada_continente.get(), ventana2)).pack(pady=10)
 
 def anadir_pais_gui(nombre: str, poblacion: str, superficie: str, continente: str, ventana2) -> None:
@@ -97,7 +112,7 @@ def anadir_pais_gui(nombre: str, poblacion: str, superficie: str, continente: st
         return
     anadir_pais(nombre, poblacion, superficie, continente)
     tk.messagebox.showinfo("Éxito", f"País {nombre} añadido correctamente.")
-    ventana2.destroy()
+    
 
 def ventana_mostrar_paises():
     ventana3 = tk.Toplevel()
