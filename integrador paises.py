@@ -63,6 +63,7 @@ def estadisticas_paises(paises: list[dict]) -> dict:
         "promedio_superficie": mean(superficies) if superficies else 0,
         "cantidad_por_continente": cantidad_por_continente        
     }
+
 if not os.path.exists(CSV_FILE): #si no existe el archivo csv, lo crea con la cabecera
     with open(CSV_FILE, mode='w', newline='') as archivo:
         escritor = csv.writer(archivo)
@@ -97,7 +98,6 @@ def ventana_anadir_pais():
     entrada_continente = tk.Entry(frame_continente, font=("Minecraft", 16))
     entrada_continente.pack(side="left", padx=5)
     tk.Button(ventana2, text="Guardar País", font=("Minecraft", 16), width=20, height=2, command=lambda: anadir_pais_gui(entrada_nombre.get(), entrada_poblacion.get(), entrada_superficie.get(), entrada_continente.get(), ventana2)).pack(pady=10)
-
 def anadir_pais_gui(nombre: str, poblacion: str, superficie: str, continente: str, ventana2) -> None:
     if nombre.strip() == "" or poblacion.strip() == "" or superficie.strip() == "" or continente.strip() == "":
         tk.messagebox.showerror("Error", "Todos los campos son obligatorios.")
@@ -111,9 +111,7 @@ def anadir_pais_gui(nombre: str, poblacion: str, superficie: str, continente: st
         tk.messagebox.showerror("Error", "Población y Superficie deben ser números positivos.")
         return
     anadir_pais(nombre, poblacion, superficie, continente)
-    tk.messagebox.showinfo("Éxito", f"País {nombre} añadido correctamente.")
-    
-
+    tk.messagebox.showinfo("Éxito", f"País {nombre} añadido correctamente.")   
 def ventana_mostrar_paises():
     ventana3 = tk.Toplevel()
     ventana3.title("Mostrar Países")
@@ -124,7 +122,6 @@ def ventana_mostrar_paises():
     texto_paises.pack(pady=10)
     for pais in paises:
         texto_paises.insert(tk.END, f"{pais['nombre']} | Población: {pais['poblacion']} | Superficie: {pais['superficie']} km² | Continente: {pais['continente']}\n")
-
 def ventana_filtrar_paises():
     ventana4 = tk.Toplevel()
     ventana4.title("Filtrar Países")
@@ -159,7 +156,6 @@ def ventana_filtrar_paises():
     texto_resultados.pack(pady=10)
 
     tk.Button(ventana4, text="Filtrar", font=("Minecraft", 16), width=20, height=2, command=lambda: filtrar_paises_gui(entrada_buscador.get(), continentes.get(), entrada_min_poblacion.get(), entrada_max_poblacion.get(), entrada_min_superficie.get(), entrada_max_superficie.get(), texto_resultados)).pack(pady=10)
-
 def filtrar_paises_gui(nombre: str, continente: str, min_poblacion: str, max_poblacion: str, min_superficie: str, max_superficie: str, texto_resultados) -> None:
     paises = cargar_paises()
     resultado = paises
@@ -189,7 +185,6 @@ def filtrar_paises_gui(nombre: str, continente: str, min_poblacion: str, max_pob
     texto_resultados.delete(1.0, tk.END)
     for pais in resultado:
         texto_resultados.insert(tk.END, f"{pais['nombre']} | Población: {pais['poblacion']} | Superficie: {pais['superficie']} km² | Continente: {pais['continente']}\n")
-
 def ventana_ordenar_paises():
     ventana5 = tk.Toplevel()
     ventana5.title("Ordenar Países")
@@ -212,7 +207,6 @@ def ordenar_paises_gui(clave: str, texto_resultados, ascendente) -> None:
     texto_resultados.delete(1.0, tk.END)
     for pais in resultado:
         texto_resultados.insert(tk.END, f"{pais['nombre']} | Población: {pais['poblacion']} | Superficie: {pais['superficie']} km² | Continente: {pais['continente']}\n")
-
 def ventana_estadisticas_paises():
     ventana6 = tk.Toplevel()
     ventana6.title("Estadísticas Países")
