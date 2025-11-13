@@ -7,8 +7,6 @@ from tkinter import messagebox
 from tkinter import ttk
 import time
 
-import os
-
 CSV_FILE = os.path.join(os.path.dirname(__file__), "paises.csv")
 
 #funciones de manejo de paises
