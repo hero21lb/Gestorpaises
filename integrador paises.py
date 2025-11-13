@@ -1,60 +1,77 @@
 #Integrador hecho por Anglat Juan y Lemus Nahuel
 
-import csv
-import os
-import tkinter as tk
-from tkinter import messagebox
-from tkinter import ttk
-import time
+import csv  # importar módulo para manejo de archivos CSV
+import os  # importar módulo para interacción con el sistema operativo
+import tkinter as tk  # importar módulo para GUI
+from tkinter import messagebox  # importar módulo para mostrar mensajes emergentes
+from tkinter import ttk  # importar módulo para widgets avanzados de GUI
+import time  # importar módulo para manejo de tiempo
 
+# definir la ruta del archivo CSV que almacenará los países
 CSV_FILE = os.path.join(os.path.dirname(__file__), "paises.csv")
 
 #funciones de manejo de paises
 
+# lista de continentes válidos
 continentes_validos = ["america del norte", "europa", "asia", "africa", "oceania", "antartida", "america del sur", "centroamerica"]
 
+# función para añadir un país al CSV
 def anadir_pais(nombre: str, poblacion: int, superficie: int, continente: str) -> None:
-    with open(CSV_FILE, mode='a', newline='') as archivo:
-        escritor = csv.writer(archivo)
-        escritor.writerow([nombre, poblacion, superficie, continente])
+    with open(CSV_FILE, mode='a', newline='') as archivo:  # abrir archivo en modo append
+        escritor = csv.writer(archivo)  # crear objeto escritor
+        escritor.writerow([nombre, poblacion, superficie, continente])  # escribir fila con datos del país
+
+# función para cargar todos los países desde el CSV
 def cargar_paises() -> list[dict]:
-    paises = []
-    if os.path.exists(CSV_FILE):
-        with open(CSV_FILE, mode='r') as archivo:
-            lector = csv.reader(archivo)
+    paises = []  # lista para almacenar países
+    if os.path.exists(CSV_FILE):  # verificar que el archivo existe
+        with open(CSV_FILE, mode='r') as archivo:  # abrir archivo en modo lectura
+            lector = csv.reader(archivo)  # crear objeto lector
             next(lector, None)  # Saltar la cabecera
-            for fila in lector:
-                pais = {
+            for fila in lector:  # recorrer cada fila
+                pais = {  # crear diccionario con información del país
                     "nombre": fila[0],
                     "poblacion": int(fila[1]),
                     "superficie": int(fila[2]),
                     "continente": fila[3]
                 }
-                paises.append(pais)
-    return paises
+                paises.append(pais)  # agregar país a la lista
+    return paises  # retornar lista de países
+
+# función para filtrar países por continente
 def filtrar_paises_por_continente(paises: list[dict], continente: str) -> list[dict]:
     return [pais for pais in paises if pais["continente"].lower() == continente.lower()]
+
+# función para filtrar países por rango de población
 def filtrar_paises_por_poblacion(paises: list[dict], min_poblacion: int, max_poblacion: int) -> list[dict]:
     return [pais for pais in paises if min_poblacion <= pais["poblacion"] <= max_poblacion]
+
+# función para filtrar países por rango de superficie
 def filtrar_paises_por_superficie(paises: list[dict], min_superficie: int, max_superficie: int) -> list[dict]:
     return [pais for pais in paises if min_superficie <= pais["superficie"] <= max_superficie]
+
+# función para filtrar países por nombre
 def filtrar_paises_por_nombre(paises: list[dict], nombre: str) -> list[dict]:
     return [pais for pais in paises if nombre.lower() in pais["nombre"].lower()]
+
+# función para ordenar países por una clave específica
 def ordenar_paises(paises: list[dict], clave: str, ascendente: bool = True) -> list[dict]:
     return sorted(paises, key=lambda x: x[clave], reverse=not ascendente)
+
+# función para calcular estadísticas de los países
 def estadisticas_paises(paises: list[dict]) -> dict:
-    from statistics import mean
-    poblaciones = [pais["poblacion"] for pais in paises]
-    superficies = [pais["superficie"] for pais in paises]
-    pais_mayor_poblacion = max(paises, key=lambda x: x["poblacion"])
-    pais_menor_poblacion = min(paises, key=lambda x: x["poblacion"])
-    cantidad_por_continente = {}
-    for pais in paises:
+    from statistics import mean  # importar función mean para calcular promedio
+    poblaciones = [pais["poblacion"] for pais in paises]  # lista de poblaciones
+    superficies = [pais["superficie"] for pais in paises]  # lista de superficies
+    pais_mayor_poblacion = max(paises, key=lambda x: x["poblacion"])  # país con mayor población
+    pais_menor_poblacion = min(paises, key=lambda x: x["poblacion"])  # país con menor población
+    cantidad_por_continente = {}  # diccionario para contar países por continente
+    for pais in paises:  # recorrer países
         continente = pais["continente"]
-        if continente not in cantidad_por_continente:
+        if continente not in cantidad_por_continente:  # si no está en el diccionario
             cantidad_por_continente[continente] = 0
-        cantidad_por_continente[continente] += 1
-    return {
+        cantidad_por_continente[continente] += 1  # incrementar contador
+    return {  # retornar diccionario con estadísticas
         "pais_mayor_poblacion": pais_mayor_poblacion,
         "pais_menor_poblacion": pais_menor_poblacion,
         "promedio_poblacion": mean(poblaciones) if poblaciones else 0,
@@ -62,6 +79,7 @@ def estadisticas_paises(paises: list[dict]) -> dict:
         "cantidad_por_continente": cantidad_por_continente        
     }
 
+# crear CSV con cabecera si no existe
 if not os.path.exists(CSV_FILE): #si no existe el archivo csv, lo crea con la cabecera
     with open(CSV_FILE, mode='w', newline='') as archivo:
         escritor = csv.writer(archivo)
@@ -69,24 +87,34 @@ if not os.path.exists(CSV_FILE): #si no existe el archivo csv, lo crea con la ca
 
 #funciones de la interfaz grafica
 
+# ventana para añadir un país mediante GUI
 def ventana_anadir_pais():
-    ventana2 = tk.Toplevel()
+    ventana2 = tk.Toplevel()  # crear ventana secundaria
     ventana2.title("Añadir País")
     ventana2.geometry("720x480")
     tk.Label(ventana2, text="Añadir Nuevo País", font=("Minecraft", 24)).pack(pady=20)
+
+    # frame y etiqueta para el nombre
     frame_nombre = tk.Frame(ventana2)
     frame_nombre.pack(pady=10)
     tk.Label(frame_nombre, text="Nombre: ", font=("Minecraft", 16)).pack(side="left", padx=5)
+
+    # frame y etiqueta para la población
     frame_poblacion = tk.Frame(ventana2)
     frame_poblacion.pack(pady=10)
     tk.Label(frame_poblacion, text="Población: ", font=("Minecraft", 16)).pack(side="left", padx=5)
+
+    # frame y etiqueta para la superficie
     frame_superficie = tk.Frame(ventana2)
     frame_superficie.pack(pady=10)
     tk.Label(frame_superficie, text="Superficie (km²): ", font=("Minecraft", 16)).pack(side="left", padx=5)
+
+    # frame y etiqueta para el continente
     frame_continente = tk.Frame(ventana2)
     frame_continente.pack(pady=10)
     tk.Label(frame_continente, text="Continente: ", font=("Minecraft", 16)).pack(side="left", padx=5)
 
+    # entradas de texto
     entrada_nombre = tk.Entry(frame_nombre, font=("Minecraft", 16))
     entrada_nombre.pack(side="left", padx=5)
     entrada_poblacion = tk.Entry(frame_poblacion, font=("Minecraft", 16))
@@ -95,31 +123,51 @@ def ventana_anadir_pais():
     entrada_superficie.pack(side="left", padx=5)
     entrada_continente = tk.Entry(frame_continente, font=("Minecraft", 16))
     entrada_continente.pack(side="left", padx=5)
-    tk.Button(ventana2, text="Guardar País", font=("Minecraft", 16), width=20, height=2, command=lambda: anadir_pais_gui(entrada_nombre.get(), entrada_poblacion.get(), entrada_superficie.get(), entrada_continente.get(), ventana2)).pack(pady=10)
+
+    # botón para guardar país
+    tk.Button(
+        ventana2, 
+        text="Guardar País", 
+        font=("Minecraft", 16), 
+        width=20, 
+        height=2, 
+        command=lambda: anadir_pais_gui(
+            entrada_nombre.get(), 
+            entrada_poblacion.get(), 
+            entrada_superficie.get(), 
+            entrada_continente.get(), 
+            ventana2)
+    ).pack(pady=10)
+
+# función que valida y guarda país desde GUI
 def anadir_pais_gui(nombre: str, poblacion: str, superficie: str, continente: str, ventana2) -> None:
     if nombre.strip() == "" or poblacion.strip() == "" or superficie.strip() == "" or continente.strip() == "":
-        tk.messagebox.showerror("Error", "Todos los campos son obligatorios.")
+        tk.messagebox.showerror("Error", "Todos los campos son obligatorios.")  # mostrar error si falta info
         return
     if not poblacion.isdigit() or not superficie.isdigit():
-        tk.messagebox.showerror("Error", "Población y Superficie deben ser números enteros.")
+        tk.messagebox.showerror("Error", "Población y Superficie deben ser números enteros.")  # error si no son números
         return
     poblacion = int(poblacion)
     superficie = int(superficie)
     if poblacion <= 0 or superficie <= 0:
-        tk.messagebox.showerror("Error", "Población y Superficie deben ser números positivos.")
+        tk.messagebox.showerror("Error", "Población y Superficie deben ser números positivos.")  # error si son <= 0
         return
-    anadir_pais(nombre, poblacion, superficie, continente)
-    tk.messagebox.showinfo("Éxito", f"País {nombre} añadido correctamente.")   
+    anadir_pais(nombre, poblacion, superficie, continente)  # guardar país en CSV
+    tk.messagebox.showinfo("Éxito", f"País {nombre} añadido correctamente.")  # mensaje de éxito
+
+# ventana para mostrar países en GUI
 def ventana_mostrar_paises():
     ventana3 = tk.Toplevel()
     ventana3.title("Mostrar Países")
     ventana3.geometry("720x480")
     tk.Label(ventana3, text="Lista de Países", font=("Minecraft", 24)).pack(pady=20)
-    paises = cargar_paises()
+    paises = cargar_paises()  # cargar países desde CSV
     texto_paises = tk.Text(ventana3, font=("Minecraft", 10))
     texto_paises.pack(pady=10)
-    for pais in paises:
+    for pais in paises:  # mostrar cada país en el Text widget
         texto_paises.insert(tk.END, f"{pais['nombre']} | Población: {pais['poblacion']} | Superficie: {pais['superficie']} km² | Continente: {pais['continente']}\n")
+
+# ventana para filtrar países en GUI
 def ventana_filtrar_paises():
     ventana4 = tk.Toplevel()
     ventana4.title("Filtrar Países")
@@ -131,13 +179,15 @@ def ventana_filtrar_paises():
     frame_botones = tk.Frame(ventana4)
     frame_botones.pack(pady=10)
 
-    tk.Label(frame_opciones, text="Nombre:       ", font=("Minecraft", 10)).pack(side="left", padx=5)
-    tk.Label(frame_opciones, text="Continente:                         ", font=("Minecraft", 10)).pack(side="left", padx=5)
-    tk.Label(frame_opciones, text="Población Min: ", font=("Minecraft", 10)).pack(side="left", padx=5)
-    tk.Label(frame_opciones, text="Población Max: ", font=("Minecraft", 10)).pack(side="left", padx=5)
-    tk.Label(frame_opciones, text="Superficie Min: ", font=("Minecraft", 10)).pack(side="left", padx=5)
-    tk.Label(frame_opciones, text="Superficie Max:  ", font=("Minecraft", 10)).pack(side="left", padx=5)
+    # etiquetas de filtros
+    tk.Label(frame_opciones, text="Nombre:                      ", font=("Minecraft", 10)).pack(side="left", padx=5)
+    tk.Label(frame_opciones, text="Continente:                                  ", font=("Minecraft", 10)).pack(side="left", padx=5)
+    tk.Label(frame_opciones, text="Población Min:        ", font=("Minecraft", 10)).pack(side="left", padx=5)
+    tk.Label(frame_opciones, text="Población Max:        ", font=("Minecraft", 10)).pack(side="left", padx=5)
+    tk.Label(frame_opciones, text="Superficie Min:        ", font=("Minecraft", 10)).pack(side="left", padx=5)
+    tk.Label(frame_opciones, text="Superficie Max:", font=("Minecraft", 10)).pack(side="left", padx=5)
 
+    # entradas de filtro
     entrada_buscador = tk.Entry(frame_botones, font=("Minecraft", 16), width=10)
     entrada_buscador.pack(side="left", padx=5)
     continentes = ttk.Combobox(frame_botones, values=["America del Norte", "Europa", "Asia", "Africa", "Oceania", "Antartida", "America del Sur", "Centroamerica"], font=("Minecraft", 16)) 
@@ -153,14 +203,31 @@ def ventana_filtrar_paises():
     texto_resultados = tk.Text(ventana4, font=("Minecraft", 10))
     texto_resultados.pack(pady=10)
 
-    tk.Button(ventana4, text="Filtrar", font=("Minecraft", 16), width=20, height=2, command=lambda: filtrar_paises_gui(entrada_buscador.get(), continentes.get(), entrada_min_poblacion.get(), entrada_max_poblacion.get(), entrada_min_superficie.get(), entrada_max_superficie.get(), texto_resultados)).pack(pady=10)
+    # botón para filtrar países
+    tk.Button(
+        ventana4, 
+        text="Filtrar", 
+        font=("Minecraft", 16), 
+        width=20, 
+        height=2, 
+        command=lambda: filtrar_paises_gui(
+            entrada_buscador.get(), 
+            continentes.get(), 
+            entrada_min_poblacion.get(), 
+            entrada_max_poblacion.get(), 
+            entrada_min_superficie.get(), 
+            entrada_max_superficie.get(), 
+            texto_resultados)
+    ).pack(pady=10)
+
+# función que aplica filtros desde GUI
 def filtrar_paises_gui(nombre: str, continente: str, min_poblacion: str, max_poblacion: str, min_superficie: str, max_superficie: str, texto_resultados) -> None:
-    paises = cargar_paises()
+    paises = cargar_paises()  # cargar todos los países
     resultado = paises
     if nombre.strip() != "":
-        resultado = filtrar_paises_por_nombre(resultado, nombre)
+        resultado = filtrar_paises_por_nombre(resultado, nombre)  # filtrar por nombre
     if continente.strip() != "":
-        resultado = filtrar_paises_por_continente(resultado, continente)
+        resultado = filtrar_paises_por_continente(resultado, continente)  # filtrar por continente
         #si no se detecta uno de los valores de superficie o poblacion, de ser minima dar el valor 0 y de ser máxima dar un valor alto
     if min_poblacion.strip() == "":
         min_poblacion = 0
@@ -180,38 +247,57 @@ def filtrar_paises_gui(nombre: str, continente: str, min_poblacion: str, max_pob
     else:
         max_superficie = int(max_superficie)
     resultado = filtrar_paises_por_superficie(resultado, min_superficie, max_superficie)
-    texto_resultados.delete(1.0, tk.END)
-    for pais in resultado:
+    texto_resultados.delete(1.0, tk.END)  # limpiar Text widget
+    for pais in resultado:  # mostrar resultados
         texto_resultados.insert(tk.END, f"{pais['nombre']} | Población: {pais['poblacion']} | Superficie: {pais['superficie']} km² | Continente: {pais['continente']}\n")
+# ventana para ordenar países en GUI
 def ventana_ordenar_paises():
-    ventana5 = tk.Toplevel()
+    ventana5 = tk.Toplevel()  # crear ventana secundaria
     ventana5.title("Ordenar Países")
     ventana5.geometry("720x480")
     tk.Label(ventana5, text="Ordenar Países", font=("Minecraft", 24)).pack(pady=20)
+
     frame_botones = tk.Frame(ventana5)
     frame_botones.pack(pady=10)
-    tk.Button(frame_botones, text="Alfabético", font=("Minecraft", 16), width=10, height=2, command=lambda: ordenar_paises_gui("nombre", texto_resultados, combo_ascendente.get() == "Ascendente")).pack(side="left", padx=5)
-    tk.Button(frame_botones, text="Población", font=("Minecraft", 16), width=10, height=2, command=lambda: ordenar_paises_gui("poblacion", texto_resultados, combo_ascendente.get() == "Ascendente")).pack(side="left", padx=5)
-    tk.Button(frame_botones, text="Superficie", font=("Minecraft", 16), width=10, height=2, command=lambda: ordenar_paises_gui("superficie", texto_resultados, combo_ascendente.get() == "Ascendente")).pack(side="left", padx=5)
-    tk.Button(frame_botones, text="Continente", font=("Minecraft", 16), width=10, height=2, command=lambda: ordenar_paises_gui("continente", texto_resultados, combo_ascendente.get() == "Ascendente")).pack(side="left", padx=5)
+
+    # botones para ordenar por diferentes claves
+    tk.Button(frame_botones, text="Alfabético", font=("Minecraft", 16), width=10, height=2,
+              command=lambda: ordenar_paises_gui("nombre", texto_resultados, combo_ascendente.get() == "Ascendente")).pack(side="left", padx=5)
+    tk.Button(frame_botones, text="Población", font=("Minecraft", 16), width=10, height=2,
+              command=lambda: ordenar_paises_gui("poblacion", texto_resultados, combo_ascendente.get() == "Ascendente")).pack(side="left", padx=5)
+    tk.Button(frame_botones, text="Superficie", font=("Minecraft", 16), width=10, height=2,
+              command=lambda: ordenar_paises_gui("superficie", texto_resultados, combo_ascendente.get() == "Ascendente")).pack(side="left", padx=5)
+    tk.Button(frame_botones, text="Continente", font=("Minecraft", 16), width=10, height=2,
+              command=lambda: ordenar_paises_gui("continente", texto_resultados, combo_ascendente.get() == "Ascendente")).pack(side="left", padx=5)
+
+    # combobox para seleccionar orden ascendente o descendente
     combo_ascendente = ttk.Combobox(frame_botones, values=["Ascendente", "Descendente"], font=("Minecraft", 16), width=10)
-    combo_ascendente.current(0)
+    combo_ascendente.current(0)  # valor por defecto: Ascendente
     combo_ascendente.pack(side="left", padx=5)
+
+    # Text widget para mostrar resultados
     texto_resultados = tk.Text(ventana5, font=("Minecraft", 10))
     texto_resultados.pack(pady=10)
+
+# función para ordenar países y mostrar resultados en GUI
 def ordenar_paises_gui(clave: str, texto_resultados, ascendente) -> None:
-    paises = cargar_paises()
-    resultado = ordenar_paises(paises, clave, ascendente)
-    texto_resultados.delete(1.0, tk.END)
-    for pais in resultado:
+    paises = cargar_paises()  # cargar países
+    resultado = ordenar_paises(paises, clave, ascendente)  # ordenar según clave
+    texto_resultados.delete(1.0, tk.END)  # limpiar Text widget
+    for pais in resultado:  # mostrar resultados
         texto_resultados.insert(tk.END, f"{pais['nombre']} | Población: {pais['poblacion']} | Superficie: {pais['superficie']} km² | Continente: {pais['continente']}\n")
+
+# ventana para mostrar estadísticas de los países en GUI
 def ventana_estadisticas_paises():
-    ventana6 = tk.Toplevel()
+    ventana6 = tk.Toplevel()  # crear ventana secundaria
     ventana6.title("Estadísticas Países")
     ventana6.geometry("720x480")
     tk.Label(ventana6, text="Estadísticas de Países", font=("Minecraft", 24)).pack(pady=20)
-    paises = cargar_paises()
-    stats = estadisticas_paises(paises)
+
+    paises = cargar_paises()  # cargar países
+    stats = estadisticas_paises(paises)  # calcular estadísticas
+
+    # frames para mostrar estadísticas
     frame_poblacion_promedio = tk.Frame(ventana6)
     frame_poblacion_promedio.pack(pady=10)
     frame_superficie_promedio = tk.Frame(ventana6)
@@ -222,20 +308,25 @@ def ventana_estadisticas_paises():
     frame_menor_población.pack(pady=10)
     frame_cantidad_continente = tk.Frame(ventana6)
     frame_cantidad_continente.pack(pady=10)
+
+    # mostrar estadísticas en labels
     tk.Label(frame_poblacion_promedio, text=f"Población Promedio: {stats['promedio_poblacion']:.2f}", font=("Minecraft", 16)).pack()
     tk.Label(frame_superficie_promedio, text=f"Superficie Promedio: {stats['promedio_superficie']:.2f} km²", font=("Minecraft", 16)).pack()
     tk.Label(frame_mayor_población, text=f"País con Mayor Población: {stats['pais_mayor_poblacion']['nombre']} ({stats['pais_mayor_poblacion']['poblacion']})", font=("Minecraft", 16)).pack()
     tk.Label(frame_menor_población, text=f"País con Menor Población: {stats['pais_menor_poblacion']['nombre']} ({stats['pais_menor_poblacion']['poblacion']})", font=("Minecraft", 16)).pack()
     tk.Label(frame_cantidad_continente, text="Cantidad de Países por Continente:", font=("Minecraft", 16)).pack()
-    for continente, cantidad in stats['cantidad_por_continente'].items():
+    for continente, cantidad in stats['cantidad_por_continente'].items():  # mostrar cantidad por continente
         tk.Label(frame_cantidad_continente, text=f" - {continente}: {cantidad}", font=("Minecraft", 14)).pack()
 
+# preguntar al usuario si desea usar interfaz gráfica
 opciondeuso = input("Desea usar la interfaz grafica? (s/n): ").lower()
 if opciondeuso == 's':
-    app = tk.Tk()
+    app = tk.Tk()  # crear ventana principal
     app.title("Gestor de Países")
     app.geometry("720x480")
     tk.Label(app, text="Menu principal", font=("Minecraft", 24)).pack(pady=20)
+
+    # botones del menú principal
     tk.Button(app, text="Añadir País ➕", font=("Minecraft", 16), width=20, height=2, command=ventana_anadir_pais).pack(pady=10)
     tk.Button(app, text="Mostrar Países 📋", font=("Minecraft", 16), width=20, height=2, command=ventana_mostrar_paises).pack(pady=10)
     tk.Button(app, text="Filtrar Países 🔍", font=("Minecraft", 16), width=20, height=2, command=ventana_filtrar_paises).pack(pady=10)
@@ -243,13 +334,13 @@ if opciondeuso == 's':
     tk.Button(app, text="Estadísticas 📊", font=("Minecraft", 16), width=20, height=2, command=ventana_estadisticas_paises).pack(pady=10)
     tk.Button(app, text="Salir ❌", font=("Minecraft", 16), width=20, height=2, command=app.quit).pack(pady=10)
 
-    app.mainloop()
+    app.mainloop()  # iniciar loop de la GUI
 
-elif opciondeuso == 'n':
+elif opciondeuso == 'n':  # si el usuario prefiere modo consola
 
     while True:
         paises = cargar_paises() #carga los paises al principio
-        time.sleep(2)
+        time.sleep(2)  # pausa para mejorar la legibilidad del menú
         print("╔═════════════════════════════════════╗")
         print("║       Menú de Gestión de Países     ║")
         print("╠═════════════════════════════════════╣")
@@ -262,8 +353,8 @@ elif opciondeuso == 'n':
         print("╚═════════════════════════════════════╝")
         opcion = input(" » Seleccione una opción del 1 al 6: \n » ")
 
-        match opcion:
-            case "1":
+        match opcion:  # selección de opción
+            case "1":  # añadir país
                 print("╔═════════════════════════════════════╗")
                 print("║          Añadir Nuevo País          ║")
                 print("╚═════════════════════════════════════╝")
@@ -274,7 +365,7 @@ elif opciondeuso == 'n':
                 elif nombre.isdigit():
                     print(" » El nombre no puede ser un número.")
                     continue
-                #comprobar que el nombre no exista en el csv
+                # comprobar que el nombre no exista en el csv
                 elif any(pais["nombre"].lower() == nombre.lower() for pais in paises):
                     print(" » El país ya existe en el registro.")
                     continue
@@ -301,25 +392,25 @@ elif opciondeuso == 'n':
                 elif continente.isdigit():
                     print(" » El continente no puede ser un número.")
                     continue
-                #comprobar que el continente exista (america, europa, asia, africa, oceania, antartida)
+                # normalizar texto para comprobar validez del continente
                 continente = continente.lower().replace("á", "a").replace("é", "e").replace("í", "i").replace("ó", "o").replace("ú", "u")
                 if continente.lower() not in continentes_validos:
                     print(" » Continente no válido. Los continentes válidos son: América del Norte, Europa, Asia, África, Oceanía, Antártida, América del Sur, Centroamérica.")
                     continue
-                #guardar el continente sin tildes
+                # guardar país
                 anadir_pais(nombre, poblacion, superficie, continente)
                 print(f" » País {nombre} añadido correctamente.")
-                
-            case "2":
+            case "2":  # mostrar países
                 print("╔═════════════════════════════════════╗")
                 print("║           Lista de Países           ║")
                 print("╚═════════════════════════════════════╝ \n")
                 if not paises:
-                    print(" » No hay países registrados.")
+                    print(" » No hay países registrados.")  # si no hay países
                 else:
-                    for pais in paises:
+                    for pais in paises:  # mostrar todos los países
                         print(f" » {pais['nombre']} | Población: {pais['poblacion']} | Superficie: {pais['superficie']} km² | Continente: {pais['continente']}")
-            case "3":
+
+            case "3":  # filtrar países
                 print("╔═════════════════════════════════════╗")
                 print("║           Filtrar Países            ║")
                 print("╚═════════════════════════════════════╝")
@@ -328,10 +419,12 @@ elif opciondeuso == 'n':
                 print(" » 3. Filtrar por Rango de Superficie")
                 print(" » 4. Filtrar por Nombre")
                 subopcion = input(" » Seleccione una opción del 1 al 4: \n » ")
-                if subopcion == "1":
+
+                if subopcion == "1":  # filtrar por continente
                     continente = input(" » Ingrese el continente: ")
                     if continente.strip() == "":
                         print(" » El continente no puede estar vacío.") 
+                        continue
                     elif continente.isdigit():
                         print(" » El continente no puede ser un número.")
                         continue
@@ -339,7 +432,8 @@ elif opciondeuso == 'n':
                         print(" » Continente no válido. Los continentes válidos son: América del Norte, Europa, Asia, África, Oceanía, Antártida, América del Sur, Centroamérica.")
                         continue
                     resultado = filtrar_paises_por_continente(paises, continente)
-                elif subopcion == "2":
+
+                elif subopcion == "2":  # filtrar por rango de población
                     min_poblacion = input(" » Ingrese la población mínima: ")
                     if not min_poblacion.isdigit():
                         print(" » La población mínima debe ser un número entero.")
@@ -360,7 +454,8 @@ elif opciondeuso == 'n':
                         print(" » La población máxima debe ser mayor o igual a la mínima.")
                         continue
                     resultado = filtrar_paises_por_poblacion(paises, min_poblacion, max_poblacion)
-                elif subopcion == "3":
+
+                elif subopcion == "3":  # filtrar por rango de superficie
                     min_superficie = input(" » Ingrese la superficie mínima (km²): ")
                     if not min_superficie.isdigit():
                         print(" » La superficie mínima debe ser un número entero.")
@@ -381,7 +476,8 @@ elif opciondeuso == 'n':
                         print(" » La superficie máxima debe ser mayor o igual a la mínima.")
                         continue
                     resultado = filtrar_paises_por_superficie(paises, min_superficie, max_superficie)
-                elif subopcion == "4":
+
+                elif subopcion == "4":  # filtrar por nombre
                     nombre = input(" » Ingrese el nombre o parte del nombre del país: ")
                     if nombre.strip() == "":
                         print(" » El nombre no puede estar vacío.")
@@ -390,16 +486,19 @@ elif opciondeuso == 'n':
                         print(" » El nombre no puede ser un número.")
                         continue
                     resultado = filtrar_paises_por_nombre(paises, nombre)
+
                 else:
                     print(" » Opción no válida.")
                     continue
+
+                # mostrar resultados del filtro
                 if not resultado:
                     print(" » No se encontraron países con los criterios especificados.")
                 else:
                     for pais in resultado:
                         print(f" » {pais['nombre']} | Población: {pais['poblacion']} | Superficie: {pais['superficie']} km² | Continente: {pais['continente']}")
-                
-            case "4":
+
+            case "4":  # ordenar países
                 print("╔═════════════════════════════════════╗")
                 print("║           Ordenar Países            ║")
                 print("╚═════════════════════════════════════╝")
@@ -415,8 +514,8 @@ elif opciondeuso == 'n':
                 resultado = ordenar_paises(paises, clave, ascendente)
                 for pais in resultado:
                     print(f" » {pais['nombre']} | Población: {pais['poblacion']} | Superficie: {pais['superficie']} km² | Continente: {pais['continente']}")
-                
-            case "5":
+
+            case "5":  # mostrar estadísticas
                 print("╔═════════════════════════════════════╗")
                 print("║          Estadísticas Países        ║")
                 print("╚═════════════════════════════════════╝")
@@ -428,9 +527,10 @@ elif opciondeuso == 'n':
                 print(" » Cantidad de países por continente:")
                 for continente, cantidad in stats['cantidad_por_continente'].items():
                     print(f"   - {continente}: {cantidad}")
-                
-            case "6":
+
+            case "6":  # salir del programa
                 print(" » Saliendo del programa... Adiós!")
                 break
-            case _:
-                print(" » Opción no válida. Por favor, seleccione una opción del 1 al 6.")  
+
+            case _:  # opción inválida
+                print(" » Opción no válida. Por favor, seleccione una opción del 1 al 6.")
